@@ -6,7 +6,7 @@ It builds the driver inside the Driver Toolkit image and pushes and image contai
 
 ### Prereq
 - Set `KUBECONFIG` in your env
-- Copy your pullsecret in $PWD/pull-secret.txt.
+- Copy your pull secret in `$PWD/pull-secret.txt`.
 - Change the `LOCAL_REGISTRY` in `build.sh` to point to a registry that is reachable from your cluster and that your pull secret has credentials for.
 
 ### Build
