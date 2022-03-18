@@ -2,7 +2,7 @@
 
 This is a repo to build Out Of Tree Intel ice driver and load it on a OCP cluster
 
-It builds the driver inside the Driver Toolkit image and pushes and image containing the kernel module to a registry.
+It builds the driver inside the Driver Toolkit image and pushes an image containing the kernel module to a registry.
 
 ### Prereq
 - Set `KUBECONFIG` in your env
