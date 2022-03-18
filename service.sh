@@ -5,7 +5,7 @@ ACTION=$1; shift
 IMAGE=$1; shift
 KERNEL=`uname -r`
 
-podman pull --authfile /var/lib/kubelet/config.json ${IMAGE}:${KERNEL} 2>&1
+podman pull --tls-verify=false --authfile /var/lib/kubelet/config.json ${IMAGE}:${KERNEL} 2>&1
 
 load_kmods() {
 
