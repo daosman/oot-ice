@@ -17,7 +17,7 @@ It builds the driver inside the Driver Toolkit image and pushes and image contai
 
 ### Deploy
 
-A 'MachineConfig' is suplied to deploy the driver container to the cluster.
+A `MachineConfig` is suplied to deploy the driver container to the cluster.
 
 ```bash
 oc apply -f mc-oot-ice.yaml
