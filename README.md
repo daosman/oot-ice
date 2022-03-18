@@ -7,7 +7,8 @@ It builds the driver inside the Driver Toolkit image and pushes an image contain
 ### Prereq
 - Set `KUBECONFIG` in your env
 - Copy your pull secret in `$PWD/pull-secret.txt`.
-- Change the `LOCAL_REGISTRY` in `build.sh` to point to a registry that is reachable from your cluster and that your pull secret has credentials for.
+- Change the `LOCAL_REGISTRY` in `build.sh`  to point to a registry that is reachable from your cluster and that your pull secret has credentials for.
+- Update the registry in `mc-oot-ice.yaml` to point to the same registry as above
 
 ### Build
 
