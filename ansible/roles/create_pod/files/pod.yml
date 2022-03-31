@@ -4,6 +4,7 @@ metadata:
   name: dpdk-testpmd
   annotations:
     k8s.v1.cni.cncf.io/networks: dpdk-network1,dpdk-network2
+    k8s.v1.cni.cncf.io/networks: kern-network1,kern-network2
     cpu-load-balancing.crio.io: "disable"
     cpu-quota.crio.io: "disable"
     irq-load-balancing.crio.io: "disable"
