@@ -1,0 +1,30 @@
+- name: "Create the DPDK SR-IOV Pod: {{ counter }}"
+  kubernetes.core.k8s:
+    src: pod.yml
+    state: present
+    wait: yes
+    wait_condition:
+      type: Ready
+      status: "True"
+    validate:
+      fail_on_error: yes
+      strict: yes
+    kubeconfig: "{{ kubeconfig }}"
+
+- name: Sleep for {{ interval }} seconds
+  shell:
+    "set -o pipefail && sleep {{ interval }}"
+  args:
+    executable: /usr/bin/bash
+  changed_when: false
+
+- name: "Delete the DPDK SR-IOV Pod: {{ counter }}"
+  shell:
+    KUBECONFIG="{{ kubeconfig}}" oc delete pod/dpdk-testpmd
+
+- name: Count
+  set_fact:
+    counter: "{{ counter | default(-1) | int + 1 }}"
+
+- name: Start again
+  include_tasks: create_pod.yml

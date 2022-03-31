@@ -1,0 +1,3 @@
+- name: Create Pod in infinite loop
+  include_tasks: 
+    file: create_pod.yml

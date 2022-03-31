@@ -1,0 +1,9 @@
+---
+- name: Create a SR-IOV Pod in a infinite loop
+  hosts: provisioner
+  roles:
+    - role: create_pod
+      tags: create_pod
+  collections:
+    - kubernetes.core.k8s_info
+    - kubernetes.core.k8s
