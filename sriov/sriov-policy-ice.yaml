@@ -1,0 +1,61 @@
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetworkNodePolicy
+metadata:
+  name: policy-net-1
+  namespace: openshift-sriov-network-operator
+spec:
+  resourceName: vfio1
+  nodeSelector:
+    node-role.kubernetes.io/master: ""
+  numVfs: 8 
+  nicSelector:
+    pfNames: ["ens2f2#0-3"]
+    rootDevices:
+      - "0000:b5:00.2"
+  deviceType: vfio-pci
+---
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetworkNodePolicy
+metadata:
+  name: policy-net-2
+  namespace: openshift-sriov-network-operator
+spec:
+  resourceName: kern1
+  nodeSelector:
+    node-role.kubernetes.io/master: ""
+  numVfs: 8 
+  nicSelector:
+    pfNames: ["ens2f2#4-7"]
+    rootDevices:
+      - "0000:b5:00.2"
+---
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetworkNodePolicy
+metadata:
+  name: policy-net-3
+  namespace: openshift-sriov-network-operator
+spec:
+  resourceName: vfio2
+  nodeSelector:
+    node-role.kubernetes.io/master: ""
+  numVfs: 8 
+  nicSelector:
+    pfNames: ["ens2f3#0-3"]
+    rootDevices:
+      - "0000:b5:00.3"
+  deviceType: vfio-pci
+---
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetworkNodePolicy
+metadata:
+  name: policy-net-4
+  namespace: openshift-sriov-network-operator
+spec:
+  resourceName: kern2
+  nodeSelector:
+    node-role.kubernetes.io/master: ""
+  numVfs: 8 
+  nicSelector:
+    pfNames: ["ens2f3#4-7"]
+    rootDevices:
+      - "0000:b5:00.3"

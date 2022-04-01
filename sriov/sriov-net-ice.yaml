@@ -1,0 +1,93 @@
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetwork
+metadata:
+  name: dpdk-network1
+  namespace: openshift-sriov-network-operator
+spec:
+  networkNamespace: default
+  vlan: 101
+  spoofChk: "on"
+  ipam: "{}"
+  resourceName: vfio1
+---
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetwork
+metadata:
+  name: dpdk-network2
+  namespace: openshift-sriov-network-operator
+spec:
+  networkNamespace: default
+  vlan: 102
+  spoofChk: "on"
+  ipam: "{}"
+  resourceName: vfio2
+---
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetwork
+metadata:
+  name: dpdk-network3
+  namespace: openshift-sriov-network-operator
+spec:
+  networkNamespace: default
+  vlan: 103
+  spoofChk: "on"
+  ipam: "{}"
+  resourceName: vfio1
+---
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetwork
+metadata:
+  name: dpdk-network4
+  namespace: openshift-sriov-network-operator
+spec:
+  networkNamespace: default
+  vlan: 104
+  spoofChk: "on"
+  ipam: "{}"
+  resourceName: vfio2
+---
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetwork
+metadata:
+  name: kern-network1
+  namespace: openshift-sriov-network-operator
+spec:
+  networkNamespace: default
+  ipam: "{}"
+  vlan: 201
+  resourceName: kern1
+---
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetwork
+metadata:
+  name: kern-network2
+  namespace: openshift-sriov-network-operator
+spec:
+  networkNamespace: default
+  ipam: "{}"
+  vlan: 202
+  resourceName: kern2 
+---
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetwork
+metadata:
+  name: kern-network3
+  namespace: openshift-sriov-network-operator
+spec:
+  networkNamespace: default
+  ipam: "{}"
+  vlan: 203
+  resourceName: kern1
+---
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetwork
+metadata:
+  name: kern-network4
+  namespace: openshift-sriov-network-operator
+spec:
+  networkNamespace: default
+  ipam: "{}"
+  vlan: 204
+  resourceName: kern2 
+ 
+
