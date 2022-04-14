@@ -1,14 +1,20 @@
 #!/bin/bash
 
-# Point to your local registry
-#REGISTRY='cnfde2.ptp.lab.eng.bos.redhat.com:5000'
+DPDK_VERSION="${1:-20.11.5}"
+
 REGISTRY='quay.io/dosman'
-#PULL_SECRET="${PWD}/pull-secret.txt"
-PULL_SECRET="${PWD}/config.json"
-DPDK_IMAGE='dpdk'
+PULL_SECRET="${HOME}/.docker/config.json"
+DPDK_IMAGE='dpdk-testpmd'
+LATEST_DPDK_VERSION="22.03"
+
+TAG=${DPDK_VERSION}
+if [ "${DPDK_VERSION}" == "${LATEST_DPDK_VERSION}" ]; then
+  TAG="latest"
+fi
 
 podman build -f Dockerfile --no-cache . \
+  --build-arg DPDK_VERSION=${DPDK_VERSION} \
   --authfile=${PULL_SECRET} \
-  -t ${REGISTRY}/${DPDK_IMAGE}
+  -t ${REGISTRY}/${DPDK_IMAGE}:${TAG}
 
-podman push --authfile=${PULL_SECRET} --tls-verify=false ${REGISTRY}/${DPDK_IMAGE}
+podman push --authfile=${PULL_SECRET} ${REGISTRY}/${DPDK_IMAGE}:${TAG}

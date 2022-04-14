@@ -4,8 +4,10 @@ LABEL maintainer="Sebastian Scheinkman <sebassch@gmail.com>"
 LABEL io.openshift.s2i.scripts-url="image:///usr/libexec/s2i"
 LABEL io.s2i.scripts-url="image:///usr/libexec/s2i"
 
+ARG DPDK_VERSION
+
 ENV BUILDER_VERSION 0.1
-ENV DPDK_VER 20.11.1
+ENV DPDK_VER ${DPDK_VERSION}
 ENV DPDK_DIR /usr/src/dpdk-stable-${DPDK_VER}
 ENV RTE_TARGET=x86_64-native-linuxapp-gcc
 ENV RTE_SDK=${DPDK_DIR}
@@ -33,16 +35,16 @@ RUN yum install -y wget python3\
  git \
  procps \
  tmux \
+ pciutils \
  gcc \
  expect && \
  yum install -y libibverbs-devel && \
  yum clean all
 
-RUN pip3 install meson ninja
-#RUN pip3 install --pre scapy[basic]
+RUN pip3 install meson ninja pyelftools
 
 RUN cd /usr/src/ && wget http://fast.dpdk.org/rel/dpdk-${DPDK_VER}.tar.xz && tar -xpvf dpdk-${DPDK_VER}.tar.xz && rm dpdk-${DPDK_VER}.tar.xz && \
-    cd dpdk-stable-${DPDK_VER} && \
+    cd dpdk*-${DPDK_VER} && \
     meson build && \
     cd build  && \
     meson configure -Denable_docs=false && \
@@ -60,16 +62,6 @@ WORKDIR /opt/app-root/src
 
 RUN chmod -R 777 /opt/app-root
 
-# TODO: Copy the S2I scripts to /usr/libexec/s2i, since openshift/base-centos7 image
-# sets io.openshift.s2i.scripts-url label that way, or update that label
-#COPY ./s2i/bin/ /usr/libexec/s2i
 COPY ./run.sh /usr/bin/run.sh
 
-#RUN setcap cap_sys_resource,cap_ipc_lock=+ep /usr/libexec/s2i/run
-
-# This is needed for the s2i to work
-# in the pod yaml we still use the runAsUser:0 we w/a the ulimit issue
-#USER 1001
-
-#CMD ["/usr/libexec/s2i/usage"]
 ENTRYPOINT ["/usr/bin/run.sh"]

@@ -1,0 +1,2 @@
+oc -n openshift-sriov-network-operator get sriovnetworknodepolicy -o yaml > sriovnetworknodepolicy.yaml
+oc -n openshift-sriov-network-operator get sriovnetworks -o yaml > sriovnetworks.yaml
