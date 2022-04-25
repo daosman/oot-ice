@@ -1,0 +1,88 @@
+---
+- name: Play to reboot SNO cluster
+  hosts: dut
+  gather_facts: no
+  remote_user: core
+  become: true
+  tasks:
+    - name: Reboot SNO and wait for it to restart
+      reboot:
+        msg: "Reboot initiated by Ansible"
+        connect_timeout: 5
+        reboot_timeout: 600
+        pre_reboot_delay: 0
+        post_reboot_delay: 900
+
+- name: Play to verify pods are healthy after reboot
+  hosts: localhost
+  tasks:
+    - name: Get the testpmd pods
+      kubernetes.core.k8s_info:
+        kind: Pod
+        namespace: default
+        kubeconfig: "{{ kubeconfig }}"
+      register: pod_list
+
+    - name: Check that the pods are present
+      assert:
+        that:
+          - "{{ pod_list.api_found }}"
+          - "not {{ pod_list.failed }}"
+          - "{{ pod_list.resources }} | length > 0"
+        fail_msg: "No pods found in default namespace."
+
+    - name: Set container statuses
+      vars:
+        query: "resources[].status.containerStatuses"
+      set_fact:
+        cont_statuses: "{{ pod_list  | json_query(query) | flatten }}"
+
+    - name: Check that the pods are healthy
+      assert:
+        that:
+          - "{{ item.ready }}"
+          - "{{ item.started }}"
+        quiet: true
+        fail_msg: "Container {{ item.name }} not started or not ready"
+      loop: "{{ cont_statuses }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+- name: Play to verify that SR-IOV resources are coorect
+  hosts: localhost
+  tasks:
+    - name: Get the node
+      kubernetes.core.k8s_info:
+        kind: Node
+        namespace: default
+        kubeconfig: "{{ kubeconfig }}"
+      register: node_list
+
+    - name: Verify we got a node
+      assert:
+        that:
+          - "{{ node_list.api_found }}"
+          - "not {{ node_list.failed }}"
+          - "{{ node_list.resources }} | length > 0"
+        fail_msg: "No nodes found in default namespace."
+
+    - name: Save the node's allocatable resources
+      vars:
+        query: "resources[].status.allocatable"
+      set_fact:
+        node_statuses: "{{ node_list  | json_query(query) | flatten }}"
+
+    - name: Check that the node's SR-IOV resources are correct
+      assert:
+        that:
+          - "{{ item['openshift.io/du_fh'] }} == 8"
+          - "{{ item['openshift.io/du_mh'] }} == 8"
+          - "{{ item['openshift.io/kern1'] }} == 4"
+          - "{{ item['openshift.io/kern2'] }} == 4"
+          - "{{ item['openshift.io/vfio1'] }} == 4"
+          - "{{ item['openshift.io/vfio2'] }} == 4"
+        quiet: true
+        fail_msg: "SR-IOV resources not right for {{ item }}"
+      loop: "{{ node_statuses }}"
+      loop_control:
+        label: "{{ item.pods }}"
