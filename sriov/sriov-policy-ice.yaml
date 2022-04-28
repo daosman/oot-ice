@@ -10,8 +10,6 @@ spec:
   numVfs: 8 
   nicSelector:
     pfNames: ["ens2f2#0-3"]
-    rootDevices:
-      - "0000:b5:00.2"
   deviceType: vfio-pci
 ---
 apiVersion: sriovnetwork.openshift.io/v1
@@ -26,8 +24,6 @@ spec:
   numVfs: 8 
   nicSelector:
     pfNames: ["ens2f2#4-7"]
-    rootDevices:
-      - "0000:b5:00.2"
 ---
 apiVersion: sriovnetwork.openshift.io/v1
 kind: SriovNetworkNodePolicy
@@ -41,8 +37,6 @@ spec:
   numVfs: 8 
   nicSelector:
     pfNames: ["ens2f3#0-3"]
-    rootDevices:
-      - "0000:b5:00.3"
   deviceType: vfio-pci
 ---
 apiVersion: sriovnetwork.openshift.io/v1
@@ -57,5 +51,3 @@ spec:
   numVfs: 8 
   nicSelector:
     pfNames: ["ens2f3#4-7"]
-    rootDevices:
-      - "0000:b5:00.3"
