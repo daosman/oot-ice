@@ -1,17 +1,12 @@
 all:
   vars:
 
-    # Path to kubeconfig for the ACM hub cluster
+    # Path to kubeconfig
     kubeconfig: /tmp/kubeconfig
 
-    # Sleep Interval in seconds
-    interval: 30
-    
-    # Pdd namespace
-    pod_namespace: default
-    
   # Ansible hosts.
   children:
-    provisioner:
+    duts:
       hosts:
-        localhost:
+        dut:
+          ansible_host: 10.16.231.46  # 10.16.231.189 #

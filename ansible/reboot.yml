@@ -11,7 +11,7 @@
         connect_timeout: 5
         reboot_timeout: 600
         pre_reboot_delay: 0
-        post_reboot_delay: 900
+        post_reboot_delay: 780
 
 - name: Play to verify pods are healthy after reboot
   hosts: localhost
@@ -45,6 +45,7 @@
         quiet: true
         fail_msg: "Container {{ item.name }} not started or not ready"
       loop: "{{ cont_statuses }}"
+      when: (item.name == "dpdk-testpmd-1") or (item.name == "dpdk-testpmd-2")
       loop_control:
         label: "{{ item.name }}"
 
