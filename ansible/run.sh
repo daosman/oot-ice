@@ -4,7 +4,7 @@ exitOnError () {
   local rc="$1"
 
   if [[ $rc -ne 0 ]]; then
-    echo "ERROR: $tasksetOutput"
+    echo "ERROR: $rc"
     exit $rc
   fi
 }
