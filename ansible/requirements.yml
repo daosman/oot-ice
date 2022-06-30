@@ -1,0 +1,5 @@
+---
+collections:
+  - containers.podman
+  - kubernetes.core
+  - cloud.common
