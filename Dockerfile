@@ -5,17 +5,20 @@ FROM ${BUILD_IMAGE} AS builder
 WORKDIR /build/
 
 ARG DRIVER_VER
+ARG KERNEL_VERSION
+ARG MIRROR
 
-# TODO: Offline build (without wget)
+ARG GET_DEVEL_RPM
+ENV GET_DEVEL_RPM=$GET_DEVEL_RPM
+RUN if [[ ${GET_DEVEL_RPM} == "yes" ]]; then \
+wget http://${MIRROR}/kernel-devel-${KERNEL_VERSION}.rpm && rpm -Uvh kernel-devel-${KERNEL_VERSION}.rpm; \
+fi
 
 RUN wget https://netix.dl.sourceforge.net/project/e1000/ice%20stable/$DRIVER_VER/ice-$DRIVER_VER.tar.gz
 RUN tar zxf ice-$DRIVER_VER.tar.gz
 WORKDIR ice-$DRIVER_VER/src
 
-ARG KERNEL_VERSION
-RUN BUILD_KERNEL=$KERNEL_VERSION KSRC=/lib/modules/$KERNEL_VERSION/build/ make
-
-# TODO: Sign
+RUN BUILD_KERNEL=$KERNEL_VERSION KSRC=/usr/src/kernels/$KERNEL_VERSION make
 
 FROM ${IMAGE}
 
