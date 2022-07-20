@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dpdk-testpmd-1
+  annotations:
+    k8s.v1.cni.cncf.io/networks: dpdk-network1,dpdk-network2,kern-network1,kern-network2
+    cpu-load-balancing.crio.io: "disable"
+    cpu-quota.crio.io: "disable"
+    irq-load-balancing.crio.io: "disable"
+  namespace: default
+spec:
+  runtimeClassName: performance-openshift-node-performance-profile
+  restartPolicy: Always
+  containers:
+  - name: dpdk-testpmd-1
+    image: quay.io/dosman/dpdk-testpmd
+    imagePullPolicy: IfNotPresent #Always #
+    env:
+    - name: SRIOV_ID_A
+      value: "VFIO1"
+    - name: SRIOV_ID_B
+      value: "VFIO2"
+    securityContext:
+      runAsUser: 0
+      capabilities:
+        add: ["IPC_LOCK","SYS_ADMIN","SYS_NICE", "NET_RAW", "SYS_RESOURCE"]
+    resources:
+      limits:
+        cpu: 3
+        memory: "1Gi"
+        hugepages-1Gi: "4Gi"
+      requests:
+        cpu: 3
+        memory: "1Gi"
+        hugepages-1Gi: "4Gi"
+    volumeMounts:
+    - mountPath: /mnt/huge
+      name: hugepage
+    - mountPath: /var/run/dpdk
+      name: dpdk
+  volumes:
+  - name: hugepage
+    emptyDir:
+      medium: HugePages
+  - name: dpdk
+    emptyDir: {}
