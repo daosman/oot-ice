@@ -9,6 +9,7 @@ cp /ddp/*.pkg . || true
 ln -sf ice*.pkg ice.pkg || true
 
 # unload in-tree driver
+rmmod irdma || true
 rmmod ice || true
 
 # load out-of-tree driver
