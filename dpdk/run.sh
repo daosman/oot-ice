@@ -243,8 +243,8 @@ TESTPMD_CMD="dpdk-testpmd \
     --nb-ports 2 \
     --portmask 3 \
     --auto-start \
-    --rxq ${TESTPMD_QUEUES} \
-    --txq ${TESTPMD_QUEUES} \
+    --rxq ${TESTPMD_CORES} \
+    --txq ${TESTPMD_CORES} \
     --rxd ${RING_SIZE} \
     --txd ${RING_SIZE} \
     --max-pkt-len=${MTU} \
