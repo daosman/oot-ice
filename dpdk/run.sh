@@ -61,8 +61,8 @@ fi
 #   PCIDEVICE_OPENSHIFT_IO_MELLANOXA=0000:86:00.2
 #   PCIDEVICE_OPENSHIFT_IO_MELLANOXB=0000:86:01.4
 
-DEVICE_A=$(env | grep "PCIDEVICE_OPENSHIFT_IO_${SRIOV_ID_A}" | cut -f2 -d'=')
-DEVICE_B=$(env | grep "PCIDEVICE_OPENSHIFT_IO_${SRIOV_ID_B}" | cut -f2 -d'=')
+DEVICE_A=$(env | grep -w "PCIDEVICE_OPENSHIFT_IO_${SRIOV_ID_A}" | cut -f2 -d'=')
+DEVICE_B=$(env | grep -w "PCIDEVICE_OPENSHIFT_IO_${SRIOV_ID_B}" | cut -f2 -d'=')
 
 echo "################# DEVICES #################"
 echo "DEVICE_A=${DEVICE_A}"
