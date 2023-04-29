@@ -1,4 +1,4 @@
-FROM quay.io/centos/centos:stream8
+FROM quay.io/centos/centos:stream9
 
 LABEL maintainer="Sebastian Scheinkman <sebassch@gmail.com>"
 LABEL io.openshift.s2i.scripts-url="image:///usr/libexec/s2i"
@@ -18,6 +18,8 @@ LABEL io.k8s.description="Platform for building DPDK workloads" \
       io.openshift.tags="builder,dpdk"
 
 RUN yum groupinstall -y "Development Tools"
+
+RUN yum install -y python3-pip
 
 # The second yum install is here to overcome versions mismatch between rpms
 RUN yum install -y wget python3\
@@ -63,5 +65,7 @@ WORKDIR /opt/app-root/src
 RUN chmod -R 777 /opt/app-root
 
 COPY ./run.sh /usr/bin/run.sh
+
+RUN chmod +x /usr/bin/run.sh
 
 ENTRYPOINT ["/usr/bin/run.sh"]
