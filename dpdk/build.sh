@@ -5,7 +5,7 @@ DPDK_VERSION="${1:-20.11.5}"
 REGISTRY='quay.io/dosman'
 PULL_SECRET="${HOME}/.docker/config.json"
 DPDK_IMAGE='dpdk-testpmd'
-LATEST_DPDK_VERSION="22.03"
+LATEST_DPDK_VERSION="23.03"
 
 TAG=${DPDK_VERSION}
 if [ "${DPDK_VERSION}" == "${LATEST_DPDK_VERSION}" ]; then
