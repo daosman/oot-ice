@@ -11,6 +11,48 @@
 #   SRIOV_ID_B (no default, error)
 #   MTU (default 1518)
 
+function set_allowed_hk_affinity () {
+  local cpuset=${1}
+  local tasksetOutput
+  tasksetOutput="$(taskset -apc "$cpuset" $$ 2>&1)"
+  if [[ $? -ne 0 ]]; then
+    echo "ERROR: $tasksetOutput"
+    exit 1
+  else
+    echo "taskset -apc "$cpuset" $$"
+  fi
+}
+
+function get_allowd_fwd_mask () {
+  local -n cpu_hk=${1}
+  local -n cpuset=${2}
+
+  IFS=',' read -r -a cpu_hk <<< "${cpu_hk}"
+  let fwd_mask=0
+  for cpuid in "${cpuset[@]}"; do
+    if [[ ${cpuid} == ${cpu_hk[0]} || ${cpuid} == ${cpu_hk[1]} ]]
+    then
+      continue
+    fi
+
+    (( fwd_mask |= (1 << cpuid) ))
+  done
+
+  printf '0x%x' $fwd_mask
+}
+
+function get_allowed_siblings () {
+  local -n cpuset=${1}
+
+  for cpuid in "${cpuset[@]}"; do
+    sib=$(cat "/sys/devices/system/cpu/cpu${cpuid}/topology/thread_siblings_list")
+    siblings="${siblings} ${sib}"
+  done
+  siblings=( `for i in ${siblings[@]}; do echo $i; done | sort -nu` )
+
+  echo "${siblings[*]}"
+
+}
 
 function get_cpus_allowed() {
     echo "$(grep Cpus_allowed_list /proc/self/status | cut -f 2)"
@@ -95,6 +137,9 @@ CPUS_ALLOWED=$(get_cpus_allowed)
 CPUS_ALLOWED_EXPANDED=$(expand_number_list "${CPUS_ALLOWED}")
 CPUS_ALLOWED_SEPARATED=$(separate_comma_list "${CPUS_ALLOWED_EXPANDED}")
 CPUS_ALLOWED_ARRAY=(${CPUS_ALLOWED_SEPARATED})
+CPUS_ALLOWED_SIBLINGS=( $(get_allowed_siblings CPUS_ALLOWED_ARRAY) )
+CPUS_ALLOWED_HK=${CPUS_ALLOWED_SIBLINGS[@]::1}
+CPUS_ALLOWED_FWD_MASK=$(get_allowd_fwd_mask CPUS_ALLOWED_HK CPUS_ALLOWED_ARRAY)
 
 if [ -z "${RING_SIZE}" ]; then
     RING_SIZE=2048
@@ -158,6 +203,9 @@ echo "################# VALUES ##################"
 echo "CPUS_ALLOWED=${CPUS_ALLOWED}"
 echo "CPUS_ALLOWED_EXPANDED=${CPUS_ALLOWED_EXPANDED}"
 echo "CPUS_ALLOWED_SEPARATED=${CPUS_ALLOWED_SEPARATED}"
+echo "CPUS_ALLOWED_SIBLINGS=${CPUS_ALLOWED_SIBLINGS[@]}"
+echo "CPUS_ALLOWED_HK=${CPUS_ALLOWED_HK}"
+echo "CPUS_ALLOWED_FWD_MASK=${CPUS_ALLOWED_FWD_MASK}"
 echo "NODE_LIST=${NODE_LIST}"
 echo "RING_SIZE=${RING_SIZE}"
 echo "SOCKET_MEM=${SOCKET_MEM}"
@@ -189,37 +237,28 @@ if [ "${FOWARD_MODE}" == "mac" ]; then
 
 fi
 
-if [ ${#CPUS_ALLOWED_ARRAY[@]} -lt 3 ]; then
-    echo "ERROR: This test needs at least 3 CPUs!"
+if [ ${#CPUS_ALLOWED_ARRAY[@]} -lt 4 ]; then
+    echo "ERROR: This test needs at least 4 CPUs!"
     exit 1
 else
     TESTPMD_CPU_LIST="${CPUS_ALLOWED_EXPANDED}"
+    TESTPMD_CPU_FWD_MASK="${CPUS_ALLOWED_FWD_MASK}"
 
-    if [ ${#CPUS_ALLOWED_ARRAY[@]} -eq 3 ]; then
-	TESTPMD_QUEUES=1
+    if [ ${#CPUS_ALLOWED_ARRAY[@]} -eq 4 ]; then
 	TESTPMD_CORES=2
-    elif [ ${#CPUS_ALLOWED_ARRAY[@]} -eq 5 ]; then
-	TESTPMD_QUEUES=2
+    elif [ ${#CPUS_ALLOWED_ARRAY[@]} -eq 6 ]; then
 	TESTPMD_CORES=4
-    elif [ ${#CPUS_ALLOWED_ARRAY[@]} -eq 7 ]; then
-	TESTPMD_QUEUES=3
+    elif [ ${#CPUS_ALLOWED_ARRAY[@]} -eq 8 ]; then
 	TESTPMD_CORES=6
-    elif [ ${#CPUS_ALLOWED_ARRAY[@]} -eq 9 ]; then
-	TESTPMD_QUEUES=4
+    elif [ ${#CPUS_ALLOWED_ARRAY[@]} -eq 10 ]; then
 	TESTPMD_CORES=8
     else
-	echo "ERROR: Unsupported CPU count,  ${#CPUS_ALLOWED_ARRAY[@]}, must be 3 or 5 or 7 or 9!"
+	echo "ERROR: Unsupported CPU count,  ${#CPUS_ALLOWED_ARRAY[@]}, must be 4 or 6 or 8 or 10!"
 	exit 1
     fi
 fi
 
-function device_status() {
-    echo "############## DEVICE STATUS ##############"
-    dpdk-devbind.py --status-dev net
-    echo -e "###########################################\n"
-}
-
-device_status
+set_allowed_hk_affinity ${CPUS_ALLOWED_HK}
 
 EXTRA_TESTPMD_ARGS=""
 if [ ${MTU} -gt 2048 ]; then
@@ -242,6 +281,7 @@ TESTPMD_CMD="dpdk-testpmd \
     --nb-cores ${TESTPMD_CORES} \
     --nb-ports 2 \
     --portmask 3 \
+    --coremask ${TESTPMD_CPU_FWD_MASK} \
     --auto-start \
     --rxq ${TESTPMD_CORES} \
     --txq ${TESTPMD_CORES} \
