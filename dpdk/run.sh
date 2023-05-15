@@ -11,6 +11,23 @@
 #   SRIOV_ID_B (no default, error)
 #   MTU (default 1518)
 
+function set_fwd_thread_sched () {
+  sleep 2
+  while ! pidof dpdk-testpmd >&/dev/null
+  do
+    sleep 1
+  done
+
+  pid=$(pidof dpdk-testpmd)
+
+  for tid in $(ps -T -p ${pid} | grep lcore-worker | awk '{print $2}')
+  do
+    echo "chrt --fifo -p 1 ${tid}"
+    chrt --fifo -p 1 ${tid}
+  done
+}
+
+
 function set_allowed_hk_affinity () {
   local cpuset=${1}
   local tasksetOutput
@@ -297,6 +314,7 @@ echo -e "Command: ${TESTPMD_CMD}\n"
 # start testpmd
 tmux new-session -s testpmd -d "${TESTPMD_CMD}; touch /tmp/testpmd-stopped; sleep infinity"
 
+set_fwd_thread_sched
 function sigtermhandler() {
     echo "Caught SIGTERM"
     local PID=$(pgrep -f "coreutils.*sleep")
@@ -309,6 +327,7 @@ function sigtermhandler() {
 }
 
 trap sigtermhandler TERM
+
 
 # block, waiting for a signal telling me to stop.  backgrounding and
 # using wait allows for signal handling to occur
@@ -332,5 +351,3 @@ echo -e "###########################################\n"
 
 # kill the sleep that is keeping tmux running
 pkill -f sleep
-
-device_status
