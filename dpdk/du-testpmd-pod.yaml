@@ -22,9 +22,9 @@ spec:
   restartPolicy: Never
   containers:
   - name: testpmd
-    image: quay.io/dosman/dpdk-testpmd
-    command: ["sleep", "infinity"]
-    args: []
+    image: quay.io/dosman/dpdk-testpmd:small
+#   command: ["sleep", "infinity"]
+#   args: []
     imagePullPolicy: Always #IfNotPresent #
     env:
     - name: FORWARD_MODE
@@ -39,11 +39,11 @@ spec:
         add: ["IPC_LOCK","SYS_ADMIN","SYS_NICE", "NET_RAW", "SYS_RESOURCE"]
     resources:
       limits:
-        cpu: 3 
+        cpu: 4
         memory: "1Gi"
         hugepages-1Gi: "4Gi"
       requests:
-        cpu: 3 
+        cpu: 4
         memory: "1Gi"
         hugepages-1Gi: "4Gi"
     volumeMounts:
