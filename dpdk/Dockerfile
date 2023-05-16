@@ -1,4 +1,4 @@
-FROM quay.io/centos/centos:stream9
+FROM quay.io/centos/centos:stream9 AS builder
 
 LABEL maintainer="Sebastian Scheinkman <sebassch@gmail.com>"
 LABEL io.openshift.s2i.scripts-url="image:///usr/libexec/s2i"
@@ -9,6 +9,7 @@ ARG DPDK_VERSION
 ENV BUILDER_VERSION 0.1
 ENV DPDK_VER ${DPDK_VERSION}
 ENV DPDK_DIR /usr/src/dpdk-stable-${DPDK_VER}
+ENV DESTDIR /usr/src/dpdk-stable-pkg-${DPDK_VER}
 ENV RTE_TARGET=x86_64-native-linuxapp-gcc
 ENV RTE_SDK=${DPDK_DIR}
 ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/
@@ -45,27 +46,54 @@ RUN yum install -y wget python3\
 
 RUN pip3 install meson ninja pyelftools
 
-RUN cd /usr/src/ && wget http://fast.dpdk.org/rel/dpdk-${DPDK_VER}.tar.xz && tar -xpvf dpdk-${DPDK_VER}.tar.xz && rm dpdk-${DPDK_VER}.tar.xz && \
+RUN cd /usr/src/ && wget http://fast.dpdk.org/rel/dpdk-${DPDK_VER}.tar.xz && tar -xpvf dpdk-${DPDK_VER}.tar.xz && rm -f dpdk-${DPDK_VER}.tar.xz && \
     cd dpdk*-${DPDK_VER} && \
-    meson build && \
+    meson setup build && \
     cd build  && \
     meson configure -Denable_docs=false && \
     ninja && \
     ninja install && \
-    echo "/usr/local/lib64" > /etc/ld.so.conf.d/dpdk.conf && \
-    ldconfig
+    cd ${DESTDIR} && \
+    tar -zcf dpdk-stable-pkg-${DPDK_VER}.tgz usr
 
-RUN ln -s ${DPDK_DIR}/build/app/dpdk-testpmd /usr/bin/testpmd
+FROM quay.io/centos/centos:stream9
 
+ARG DPDK_VERSION
 
-RUN mkdir -p /opt/app-root/src
-
-WORKDIR /opt/app-root/src
-
-RUN chmod -R 777 /opt/app-root
+ENV DPDK_VER ${DPDK_VERSION}
+ENV DPDK_DIR /usr/src/dpdk-stable-${DPDK_VER}
+ENV DESTDIR /usr/src/dpdk-stable-pkg-${DPDK_VER}
+ENV RTE_TARGET=x86_64-native-linuxapp-gcc
+ENV RTE_SDK=${DPDK_DIR}
 
 COPY ./run.sh /usr/bin/run.sh
+COPY --from=builder ${DESTDIR}/dpdk-stable-pkg-${DPDK_VER}.tgz /opt/
 
+RUN INSTALL_PKGS="bsdtar \
+  findutils \
+  util-linux \
+  numactl \
+  numactl-devel \
+  tmux \
+  tar \
+  ethtool \
+  patch \
+  which \
+  procps-ng \
+  readline-devel \
+  iproute \
+  xz \
+  libibverbs" && \
+  yum install -y $INSTALL_PKGS && \
+  rpm -V $INSTALL_PKGS && \
+  yum -y clean all
+
+RUN tar xf /opt/dpdk-stable-pkg-${DPDK_VER}.tgz -C / && rm -rf /opt/dpdk-stable-pkg-${DPDK_VER}.tgz
+
+RUN echo "/usr/local/lib64" > /etc/ld.so.conf.d/dpdk.conf && ldconfig
+
+WORKDIR ${HOME}
+ 
 RUN chmod +x /usr/bin/run.sh
 
 ENTRYPOINT ["/usr/bin/run.sh"]
