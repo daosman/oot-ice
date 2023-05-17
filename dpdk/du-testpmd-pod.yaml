@@ -22,7 +22,7 @@ spec:
   restartPolicy: Never
   containers:
   - name: testpmd
-    image: quay.io/dosman/dpdk-testpmd:small
+    image: quay.io/dosman/dpdk-testpmd:22.11.1
 #   command: ["sleep", "infinity"]
 #   args: []
     imagePullPolicy: Always #IfNotPresent #

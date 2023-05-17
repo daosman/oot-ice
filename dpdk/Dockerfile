@@ -1,8 +1,6 @@
 FROM quay.io/centos/centos:stream9 AS builder
 
-LABEL maintainer="Sebastian Scheinkman <sebassch@gmail.com>"
-LABEL io.openshift.s2i.scripts-url="image:///usr/libexec/s2i"
-LABEL io.s2i.scripts-url="image:///usr/libexec/s2i"
+LABEL maintainer="Dahir Osman <dosman@gmail.com>"
 
 ARG DPDK_VERSION
 
@@ -82,6 +80,7 @@ RUN INSTALL_PKGS="bsdtar \
   procps-ng \
   readline-devel \
   iproute \
+  libatomic \
   xz \
   libibverbs" && \
   yum install -y $INSTALL_PKGS && \

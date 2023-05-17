@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DPDK_VERSION="${1:-20.11.5}"
+DPDK_VERSION="${1:-22.11.1}"
 
 REGISTRY='quay.io/dosman'
 PULL_SECRET="${HOME}/.docker/config.json"
