@@ -20,10 +20,12 @@ function set_fwd_thread_sched () {
 
   pid=$(pidof dpdk-testpmd)
 
-  for tid in $(ps -T -p ${pid} | grep lcore-worker | awk '{print $2}')
+  for tid in $(ps -T -p ${pid} | grep worker | awk '{print $2}')
   do
     echo "chrt --fifo -p 1 ${tid}"
     chrt --fifo -p 1 ${tid}
+    # Display the priority of the process
+    chrt -p ${tid}
   done
 }
 
@@ -53,6 +55,9 @@ function get_allowd_fwd_mask () {
     fi
 
     (( fwd_mask |= (1 << cpuid) ))
+    if [ ! -z "${SINGLE_FWD_CORE}" ]; then
+      break
+    fi
   done
 
   printf '0x%x' $fwd_mask
@@ -243,14 +248,13 @@ case "${FORWARD_MODE}" in
 	;;
 esac
 
-if [ "${FOWARD_MODE}" == "mac" ]; then
+if [ "${FORWARD_MODE}" == "mac" ]; then
     if [ -z "${PEER_A_MAC}" -o -z "${PEER_B_MAC}" ]; then
 	echo "ERROR: You must define PEER_A_MAC and PEER_B_MAC environment variables"
 	exit 1
     fi
 
-    TESTPMD_FORWARD_MODE_ARGS=" --eth-peer=0,${PEER_A_MAC} \
-                                --eth-peer=1,${PEER_B_MAC} \ "
+    TESTPMD_FORWARD_MODE_ARGS=" --eth-peer=0,${PEER_A_MAC} --eth-peer=1,${PEER_B_MAC}"
 
 fi
 
@@ -272,6 +276,9 @@ else
     else
 	echo "ERROR: Unsupported CPU count,  ${#CPUS_ALLOWED_ARRAY[@]}, must be 4 or 6 or 8 or 10!"
 	exit 1
+    fi
+    if [ ! -z "${SINGLE_FWD_CORE}" ]; then
+      TESTPMD_CORES=1
     fi
 fi
 

@@ -79,6 +79,9 @@ RUN INSTALL_PKGS="bsdtar \
   which \
   procps-ng \
   readline-devel \
+  perf \
+  pciutils \
+  kmod \
   iproute \
   libatomic \
   xz \
