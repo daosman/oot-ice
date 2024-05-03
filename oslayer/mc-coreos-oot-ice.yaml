@@ -2,7 +2,7 @@ apiVersion: machineconfiguration.openshift.io/v1
 kind: MachineConfig
 metadata:
   labels:
-    machineconfiguration.openshift.io/role: worker
-  name: 99-dosman-external-image 
+    machineconfiguration.openshift.io/role: master
+  name: 99-dell-oot-ice-ext-image
 spec:
-  osImageURL: quay.io/dosman/coreos-intel-oot:5.14.0-284.32.1.el9_2.x86_64
+  osImageURL: quay.io/dosman/coreos-dell-oot-ice:5.14.0-427.13.1.el9_4.x86_64

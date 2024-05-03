@@ -7,7 +7,8 @@ WORKDIR /build/
 ARG DRIVER_VER
 ARG KERNEL_VERSION
 
-RUN wget https://netix.dl.sourceforge.net/project/e1000/ice%20stable/$DRIVER_VER/ice-$DRIVER_VER.tar.gz
+COPY ice-$DRIVER_VER.tar.gz .
+
 RUN tar zxf ice-$DRIVER_VER.tar.gz
 WORKDIR ice-$DRIVER_VER/src
 
